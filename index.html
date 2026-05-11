@@ -63,11 +63,11 @@
             });
 
             // Отображаем маршрут и расписание
-            if (routeNumber === 1) {
+            if (route === РУ-ФП) {
                 console.log("Выбран маршрут РУ-ФП");
                 L.geoJSON(geojsonData1).addTo(map);
                 showSchedule(1);
-            } else if (routeNumber === 2) {
+            } else if (route === ТЦ Славянка-ФП) {
                 console.log("Выбран маршрут ТЦ Славянка-ФП");
                 L.geoJSON(geojsonData2).addTo(map);
                 showSchedule(2);
