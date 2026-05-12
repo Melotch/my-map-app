@@ -56,7 +56,30 @@
     <script>
         // Инициализация карты
         const map = L.map('map').setView([51.2776, 37.7265], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    function showRoute(routeId) {
+    if (currentRouteLayer) {
+        map.removeLayer(currentRouteLayer); // Удаляем предыдущий слой с маршрутом
+    }
+
+    let geojsonData;
+    if (routeId === 1) {
+        geojsonData = geojsonData1; // Данные для маршрута «РУ — ФП»
+    } else if (routeId === 2) {
+        geojsonData = geojsonData2; // Данные для маршрута «ТЦ Славянка — ФП»
+    }
+
+    currentRouteLayer = L.geoJSON(geojsonData, {
+        style: function(feature) {
+            return {color: 'blue', weight: 5, opacity: 0.8};
+        }
+    }).addTo(map);
+}
+                    function hidePopup() {
+    document.getElementById('schedule-popup').style.display = 'none';
+}
+
+{
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
