@@ -101,10 +101,10 @@ function initMap() {
     map = L.map('map').setView([51.258, 37.508], 13);
 
     // Подключаем стандартную подложку OpenStreetMap
-    L.tileLayer('', {
-        maxZoom: 19,
-        attribution: ''
-    }).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
 
     console.log("Карта успешно инициализирована");
 
@@ -148,34 +148,38 @@ function removeRouteFromMap(routeId) {
 
 // Функции для работы с остановками
 function drawStopsOnMap(route) {
-    if (!route.stops) return;
+  if (!route.stops) return;
 
-    route.stops.forEach(stop => {
-        if (!activeMapLayers[stop.id]) {
-            const marker = L.marker(stop.coords, {
-                icon: L.divIcon({
-                    className: 'stop-marker',
-            html: `<div class="stop-icon">${stop.name}</div>`,
-            iconSize: [40, 40]
+  route.stops.forEach(stop => {
+    if (!activeMapLayers[stop.id]) {
+      const marker = L.marker(stop.coords, {
+        icon: L.divIcon({
+          className: 'stop-marker',
+          html: `<div class="stop-icon">${stop.name}</div>`,
+          iconSize: [40, 40]
         })
-            }).addTo(map);
+      }).addTo(map);
 
-            activeMapLayers[stop.id] = marker;
-        }
-    });
+      activeMapLayers[stop.id] = marker;
+    }
+  });
 }
 
 function removeStopsFromMap(routeId) {
-    for (const groupName in routeGroups) {
-        const group = routeGroups[groupName];
-        group.routes.forEach(route => {
-            if (route.id === routeId && route.stops) {
-                route.stops.forEach(stop => {
-                    if (activeMapLayers[stop.id]) {
-                map.removeLayer(activeMapLayers[stop.id]);
-                delete activeMapLayers[stop.id];
-            }
-        ;
+  for (const groupName in routeGroups) {
+    const group = routeGroups[groupName];
+    group.routes.forEach(route => {
+      if (route.id === routeId && route.stops) {
+        route.stops.forEach(stop => {
+          if (activeMapLayers[stop.id]) {
+            map.removeLayer(activeMapLayers[stop.id]);
+            delete activeMapLayers[stop.id];
+          }
+        });
+      }
+    });
+  }
+}
 // 4. ГЕНЕРАЦИЯ ДИНАМИЧЕСКОГО ИНТЕРФЕЙСА УПРАВЛЕНИЯ
 function initRouteManager() {
     const container = document.getElementById('routeSidebar');
