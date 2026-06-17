@@ -3,163 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мониторинг маршрутов фабрики</title>
-    
+    <title>Карта маршрутов</title>
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet" />
-
     <style>
         body, html {
             margin: 0;
             padding: 0;
-            width: 100%;
             height: 100%;
-            overflow: hidden;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: Arial, sans-serif;
         }
 
         #map {
             width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            bottom: 0;
+            height: 100vh;
         }
 
-        /* Стильная темная панель управления поверх карты */
+        /* Адаптивность панели управления */
         .route-sidebar {
+            width: 320px;
+            max-height: 80vh;
             position: absolute;
             top: 20px;
             left: 20px;
-            z-index: 9999; /* Поверх карты */
+            z-index: 9999;
             background: rgba(24, 28, 36, 0.95);
             color: #e0e6ed;
             padding: 20px;
             border-radius: 12px;
-            max-height: 80vh;
             overflow-y: auto;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 320px;
             border: 1px solid rgba(255,255,255,0.1);
             backdrop-filter: blur(8px);
         }
 
-        .sidebar-header h3 {
-            margin: 0 0 4px 0;
-            font-size: 18px;
-            color: #fff;
-            letter-spacing: 0.5px;
-        }
-
-        .sidebar-header .sub-title {
-            font-size: 12px;
-            color: #8898aa;
-        }
-
-        .route-sidebar hr {
-            border: 0;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            margin: 14px 0;
-        }
-
         .route-group {
-            background: rgba(255, 255, 255, 0.03);
-            margin-bottom: 12px;
-            padding: 10px 14px;
-            border-radius: 8px;
-            border-left: 4px solid #4a5568;
-            transition: all 0.2s ease;
-        }
-
-        .route-group:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-left-color: #3498db;
+            margin-bottom: 15px;
         }
 
         .route-group-title {
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            user-select: none;
-            color: #fff;
         }
 
-        .route-group-title input {
-            margin-right: 12px;
-            accent-color: #3498db;
-            cursor: pointer;
-            width: 16px;
-            height: 16px;
+        .route-toggle {
+            margin-right: 8px;
+            font-size: 16px;
         }
 
-        .group-routes-list {
-            margin-top: 10px;
-            padding-left: 4px;
+        .route-list {
+            padding-left: 20px;
         }
 
         .route-item {
-            display: flex;
-            align-items: center;
-            margin: 8px 0;
-            font-size: 13px;
-            cursor: pointer;
-            color: #cbd5e1;
-            user-select: none;
+            margin: 5px 0;
         }
 
-        .route-item:hover {
-            color: #fff;
+        .route-checkbox {
+            margin-right: 8px;
         }
 
-        .route-item input {
-            margin-right: 10px;
-            accent-color: #3498db;
-            cursor: pointer;
-            width: 14px;
-            height: 14px;
+        /* Для планшетов (768px–1024px) */
+        @media (max-width: 1024px) {
+            .route-sidebar {
+                width: 280px;
+                padding: 16px;
+            }
+            .route-group-title {
+                font-size: 13px;
+            }
         }
 
-        .color-bullet {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            margin-right: 10px;
-            border-radius: 50%;
-            box-shadow: 0 0 6px rgba(0,0,0,0.6);
+        /* Для мобильных (<768px) */
+        @media (max-width: 768px) {
+            .route-sidebar {
+                position: fixed;
+                top: 0;
+                left: -320px; /* Спрятано за экраном */
+                bottom: 0;
+                width: 300px;
+                max-height: none;
+                border-radius: 0;
+                transition: left 0.3s ease;
+                z-index: 10000;
+            }
+
+            /* Состояние открытой панели */
+            .route-sidebar.open {
+                left: 0;
+            }
+
+            /* Кнопка-бургер для открытия меню */
+            .menu-toggle {
+                position: fixed;
+                top: 15px;
+                right: 15px;
+                z-index: 10001;
+                background: rgba(24, 28, 36, 0.9);
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+            }
         }
 
-        /* Кастомный скроллбар для панели */
-        .route-sidebar::-webkit-scrollbar {
-            width: 6px;
+        .stop-marker {
+            text-align: center;
         }
-        .route-sidebar::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.1);
-        }
-        .route-sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
-            border-radius: 3px;
+        .stop-icon {
+            background: #ff6b6b;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
         }
     </style>
 </head>
 <body>
-
     <div id="map"></div>
 
-    <div id="map-control-panel" class="route-sidebar">
-        <div class="sidebar-header">
-            <h3>Диспетчер маршрутов</h3>
-            <span class="sub-title">Управление подразделениями фабрики</span>
-        </div>
-        <hr>
-        <div id="groups-container"></div>
+    <!-- Панель управления маршрутами -->
+    <div class="route-sidebar" id="routeSidebar">
+        <!-- Меню будет сгенерировано автоматически -->
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Кнопка для мобильных устройств -->
+    <button class="menu-toggle" onclick="toggleMenu()">☰ Меню</button>
 
-    <script src="main.js"></script>
+    <!-- Подключаем Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Наш JS-код -->
+    <script src="script.js"></script>
 </body>
 </html>
