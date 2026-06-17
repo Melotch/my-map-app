@@ -5349,10 +5349,6 @@ const routeGroups = {
             }
         ]
     },
-    {
-     id: "czhdt_2",
-                name: "ТЦ Славянка - ЦЖДТ",
-                coordinates:[
     "Губкин": {
         enabled: false,
         color: "#9b59b6", // Фиолетовый для городских маршрутов Губкина
