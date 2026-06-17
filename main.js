@@ -1,5 +1,5 @@
 // 1. Создаем карту, привязывая её к div с id="map"
-const map = L.map('map').setView([55.7558, 37.6173], 10); // Москва, масштаб 10
+const map = L.map('map').setView([51.258, 37.508], 13); 
 
 // 2. Добавляем базовый слой карт (OpenStreetMap)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -101,9 +101,9 @@ function initMap() {
     map = L.map('map').setView([51.258, 37.508], 13);
 
     // Подключаем стандартную подложку OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('', {
         maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
+        attribution: ''
     }).addTo(map);
 
     console.log("Карта успешно инициализирована");
