@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Карта маршрутов</title>
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body, html {
@@ -19,7 +18,7 @@
             height: 100vh;
         }
 
-        /* Адаптивность панели управления */
+        /* Панель управления маршрутами */
         .route-sidebar {
             width: 320px;
             max-height: 80vh;
@@ -38,33 +37,97 @@
         }
 
         .route-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .route-group-title {
             font-weight: bold;
-            margin-bottom: 8px;
+            font-size: 15px;
+            margin-bottom: 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
         }
 
-        .route-toggle {
-            margin-right: 8px;
-            font-size: 16px;
+        .group-checkbox, .route-checkbox {
+            margin-right: 10px;
+            cursor: pointer;
         }
 
-        .route-list {
-            padding-left: 20px;
+        .group-routes-list {
+            padding-left: 15px;
+            margin-top: 5px;
         }
 
         .route-item {
-            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 14px;
+            cursor: pointer;
         }
 
-        .route-checkbox {
+        /* Цветные маркеры (кругляшки) в меню */
+        .color-bullet {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
             margin-right: 8px;
+            box-shadow: 0 0 4px rgba(0,0,0,0.5);
         }
+
+        /* --- НОВЫЕ КРАСИВЫЕ СТИЛИ ДЛЯ ЦВЕТНЫХ ОСТАНОВОК --- */
+        .stop-marker-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Белая точка, цвет рамки подставится из JS */
+        .stop-marker-body {
+            width: 12px;
+            height: 12px;
+            background-color: #ffffff;
+            border: 3px solid #333; 
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Название остановки рядом с точкой */
+        .stop-title {
+            position: absolute;
+            left: 18px;
+            top: -5px;
+            background-color: rgba(24, 28, 36, 0.9);
+            color: #e0e6ed;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Эффект пульсации под остановкой */
+        .stop-marker-pulse {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: pulse 2s infinite;
+            z-index: 1;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.5); opacity: 0.6; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        /* ------------------------------------------------ */
 
         /* Для планшетов (768px–1024px) */
         @media (max-width: 1024px) {
@@ -73,7 +136,7 @@
                 padding: 16px;
             }
             .route-group-title {
-                font-size: 13px;
+                font-size: 14px;
             }
         }
 
@@ -82,7 +145,7 @@
             .route-sidebar {
                 position: fixed;
                 top: 0;
-                left: -320px; /* Спрятано за экраном */
+                left: -340px; /* Спрятано за экраном */
                 bottom: 0;
                 width: 300px;
                 max-height: none;
@@ -92,7 +155,7 @@
             }
 
             /* Состояние открытой панели */
-            .route-sidebar.open {
+            .route-sidebar.active {
                 left: 0;
             }
 
@@ -104,41 +167,33 @@
                 z-index: 10001;
                 background: rgba(24, 28, 36, 0.9);
                 color: white;
-                border: none;
-                padding: 8px 12px;
+                border: 1px solid rgba(255,255,255,0.1);
+                padding: 10px 15px;
                 border-radius: 6px;
                 cursor: pointer;
                 font-size: 14px;
+                display: block;
             }
         }
 
-        .stop-marker {
-            text-align: center;
-        }
-        .stop-icon {
-            background: #ff6b6b;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            white-space: nowrap;
+        /* По умолчанию скрываем бургер на десктопах */
+        @media (min-width: 769px) {
+            .menu-toggle {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
+
     <div id="map"></div>
 
-    <!-- Панель управления маршрутами -->
     <div class="route-sidebar" id="routeSidebar">
-        <!-- Меню будет сгенерировано автоматически -->
-    </div>
+        </div>
 
-    <!-- Кнопка для мобильных устройств -->
-    <button class="menu-toggle" onclick="toggleMenu()">☰ Меню</button>
+    <button class="menu-toggle" id="menuToggle">☰ Меню</button>
 
-    <!-- Подключаем Leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Наш JS-код -->
     <script src="main.js"></script>
 </body>
 </html>
