@@ -98,7 +98,7 @@ const activeMapLayers = {};
 // 2. ИНИЦИАЛИЗАЦИЯ КАРТЫ (Leaflet)
 function initMap() {
     // Устанавливаем фокус карты на район промплощадки (Губкин)
-    map = L.map('map').setView([51.258, 37.508], 13);
+    //map = L.map('map').setView([51.258, 37.508], 13);
 
     // Подключаем стандартную подложку OpenStreetMap
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
