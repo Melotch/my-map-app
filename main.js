@@ -291,4 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
                 });
-            }
+            });
+    });
+    };
+};
