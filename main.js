@@ -111,13 +111,6 @@ function initMap() {
     // Запускаем менеджер меню маршрутов
     initRouteManager();
 }
-// 2. ЗДЕСЬ НАЧИНАЕТСЯ ВАША ЧАСТЬ (Добавляйте сюда)
-// Получаем доступ к панели
-const sidebar = document.getElementById('routeSidebar');
-
-// Вставляем в панель
-sidebar.innerHTML = menuContent;
-
 // 3. ОТРИСОВКА И УДАЛЕНИЕ ЛИНИЙ МАРШРУТОВ И ОСТАНОВОК
 function drawRouteOnMap(route) {
     if (activeMapLayers[route.id]) return; // Если уже нарисован, игнорируем
