@@ -233,8 +233,7 @@ function setupCheckboxListeners() {
 
             // Проходим по всем маршрутам этой группы
             routeGroups[groupName].routes.forEach(route => {
-                const routeCheckbox = document.querySelector(
-                    (`input[data-route-id="${route.id}"]`);
+               const routeCheckbox = document.querySelector(`input[data-route-id="\${route.id}"]`);
 
                 if (routeCheckbox) {
                     routeCheckbox.checked = isChecked;
