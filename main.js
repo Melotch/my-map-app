@@ -115,15 +115,6 @@ function initMap() {
 // Получаем доступ к панели
 const sidebar = document.getElementById('routeSidebar');
 
-// Создаём HTML для меню
-const menuContent = `
-  <h3>Маршруты</h3>
-  <ul>
-    <li><input type="checkbox" id="route1"> Маршрут 1</li>
-    <li><input type="checkbox" id="route2"> Маршрут 2</li>
-  </ul>
-`;
-
 // Вставляем в панель
 sidebar.innerHTML = menuContent;
 
