@@ -174,7 +174,6 @@ function removeStopsFromMap(routeId) {
         });
     }
 }
-}
 
 // 4. ГЕНЕРАЦИЯ ДИНАМИЧЕСКОГО ИНТЕРФЕЙСА УПРАВЛЕНИЯ
 function initRouteManager() {
