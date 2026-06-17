@@ -290,3 +290,4 @@ document.addEventListener('DOMContentLoaded', function() {
         menuToggleBtn.addEventListener('click', toggleMenu);
     }
 });
+                });
