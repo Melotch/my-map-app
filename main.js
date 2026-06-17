@@ -93,7 +93,7 @@ const routeGroups = {
 };
 
 // Переменные для карты и хранения активных слоёв
-let map;
+var map;
 const activeMapLayers = {};
 
 // 2. ИНИЦИАЛИЗАЦИЯ КАРТЫ (Leaflet)
