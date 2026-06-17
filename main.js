@@ -3,7 +3,8 @@ const map = L.map('map').setView([51.258, 37.508], 13);
 
 // 2. Добавляем базовый слой карт (OpenStreetMap)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-});
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
 
 // 1. БАЗА ДАННЫХ МАРШРУТОВ ПО ПОДРАЗДЕЛЕНИЯМ
 const routeGroups = {
@@ -110,6 +111,21 @@ function initMap() {
     // Запускаем менеджер меню маршрутов
     initRouteManager();
 }
+// 2. ЗДЕСЬ НАЧИНАЕТСЯ ВАША ЧАСТЬ (Добавляйте сюда)
+// Получаем доступ к панели
+const sidebar = document.getElementById('routeSidebar');
+
+// Создаём HTML для меню
+const menuContent = `
+  <h3>Маршруты</h3>
+  <ul>
+    <li><input type="checkbox" id="route1"> Маршрут 1</li>
+    <li><input type="checkbox" id="route2"> Маршрут 2</li>
+  </ul>
+`;
+
+// Вставляем в панель
+sidebar.innerHTML = menuContent;
 
 // 3. ОТРИСОВКА И УДАЛЕНИЕ ЛИНИЙ МАРШРУТОВ И ОСТАНОВОК
 function drawRouteOnMap(route) {
