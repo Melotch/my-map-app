@@ -169,12 +169,7 @@ function removeStopsFromMap(routeId) {
                 map.removeLayer(activeMapLayers[stop.id]);
                 delete activeMapLayers[stop.id];
             }
-        });
-            }
-        });
-    }
-}
-
+        ;
 // 4. ГЕНЕРАЦИЯ ДИНАМИЧЕСКОГО ИНТЕРФЕЙСА УПРАВЛЕНИЯ
 function initRouteManager() {
     const container = document.getElementById('routeSidebar');
