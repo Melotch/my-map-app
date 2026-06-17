@@ -11,7 +11,7 @@ const routeGroups = {
     "Фабричная Площадка": {
         enabled: true, // Будет включена сразу при загрузке сайта
         routes: {
-            {
+            
                 id: "fab_1",
                 name: "РУ-ФП",
                 color: "#e74c3c",
