@@ -2,9 +2,8 @@
 const map = L.map('map').setView([51.258, 37.508], 13); 
 
 // 2. Добавляем базовый слой карт (OpenStreetMap)
-L.tileLayer('', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">'
-}).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+});
 
 // 1. БАЗА ДАННЫХ МАРШРУТОВ ПО ПОДРАЗДЕЛЕНИЯМ
 const routeGroups = {
