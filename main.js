@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
                 });
-            });
+            };
     });
     };
 };
