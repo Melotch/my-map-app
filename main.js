@@ -71,7 +71,7 @@ const routeGroups = {
             { id: "stop_fab1_2", name: "Остановка 2", coords: [] }  // ← КООРДИНАТЫ ОСТАНОВКИ
                 ]
             }
-};
+},
             {
                 id: "fab_2",
                 name: "ТЦ Славянка-ФП",
