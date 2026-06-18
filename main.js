@@ -1,5 +1,9 @@
-// 1. Создаем карту, привязывая её к div с id="map"
-const map = L.map('map').setView([51.258, 37.508], 13); 
+// БЫЛО:
+// const map = L.map('map').setView([51.258, 37.508], 13); 
+
+// СТАЛО (Добавили параметр отключения копирайта):
+const map = L.map('map', { attributionControl: false }).setView([51.258, 37.508], 13);
+
 
 // 2. Добавляем базовый слой карт (OpenStreetMap)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
