@@ -5355,7 +5355,7 @@ const routeGroups = {
         routes: [
             {
                 id: "gub_1",
-                name: "Губкин - ФП",
+                name: "ФП - Губкин",
                 coordinates: [
         [
             51.24315,
