@@ -13103,25 +13103,27 @@ function setupCheckboxListeners() {
     });
 }
 
-    document.querySelectorAll('.route-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const routeId = this.getAttribute('data-route-id');
-            const groupName = this.getAttribute('data-group');
-            const isChecked = this.checked;
-            const groupColor = routeGroups[groupName].color;
+   document.querySelectorAll('.route-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const routeId = this.getAttribute('data-route-id');
+        const groupName = this.getAttribute('data-group');
+        const isChecked = this.checked;
+        const groupColor = routeGroups[groupName].color;
 
-            const route = routeGroups[groupName].routes.find(r => r.id === routeId);
+        const route = routeGroups[groupName].routes.find(r => r.id === routeId);
 
-            if (route) {
-                if (isChecked) {
-                    drawRouteOnMap(route, groupColor);
-                } else {
-                    removeRouteFromMap(routeId);
-                }
+        if (route) {
+            if (isChecked) {
+                drawRouteOnMap(route, groupColor);
+            } else {
+                removeRouteFromMap(routeId);
             }
-        });
+        }
+
+        // ШАГ 4: Запускаем обновление расписания при клике на чекбокс
+        updateSchedulePanel();
     });
-}
+});
 
 function updateSchedulePanel() {
     const schedulePanel = document.getElementById('schedule-panel');
