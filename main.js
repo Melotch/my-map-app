@@ -1662,7 +1662,7 @@ const routeGroups = {
     ]
 ],
                 stops: []
-            }
+            },
      {
             id: "fab_3",
                 name: "ФП - ТЦ Славянка",
