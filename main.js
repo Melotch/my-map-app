@@ -19,6 +19,7 @@ const routeGroups = {
             {
                 id: "fab_1",
                 name: "РУ-ФП",
+                schedule: [06:25 (до ФОК); 06:35 (до ФОК); 06:40 (до ФОК); 07:00 (до ФОК); 07:15 (до ФОК); 07:55 (до ФОК); 08:05; 14:30; 16:00 (2); 16:10; 16:20;  16:30 (до ФОК); 16:30 (до склад мет.); 16:40 (до ФОК); 18:10; 18:40 (до ФОК); 19:10; 19:20 (до ФОК); 19:35 (до ФОК); 22:25],
                 coordinates: [
                     [51.27766425509148, 37.72653402161464],
                     [51.277819108393146, 37.72871705496806],
@@ -13054,6 +13055,7 @@ function initRouteManager() {
 
 // 5. ОБРАБОТЧИКИ КЛИКОВ (Передаем цвета групп при кликах)
 function setupCheckboxListeners() {
+    // 1. Клик по группе (Выбрать всё подразделение)
     document.querySelectorAll('.group-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             const groupName = this.getAttribute('data-group');
@@ -13064,7 +13066,7 @@ function setupCheckboxListeners() {
 
             routeGroups[groupName].routes.forEach(route => {
                 const routeCheckbox = document.querySelector(`input[data-route-id="${route.id}"]`);
-
+                
                 if (routeCheckbox) {
                     routeCheckbox.checked = isChecked;
                     if (isChecked) {
@@ -13074,8 +13076,32 @@ function setupCheckboxListeners() {
                     }
                 }
             });
+
+            // ВЫЗОВ 1: Обновляем расписание после переключения группы
+            updateSchedulePanel();
         });
     });
+
+    // 2. Клик по одиночному маршруту
+    document.querySelectorAll('.route-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const routeId = this.getAttribute('data-route-id');
+            const groupName = this.getAttribute('data-group');
+            const route = routeGroups[groupName].routes.find(r => r.id === routeId);
+
+            if (this.checked) {
+                drawRouteOnMap(route, route.color);
+            } else {
+                removeRouteFromMap(routeId);
+                const groupCheckbox = document.querySelector(`.group-checkbox[data-group="${groupName}"]`);
+                if (groupCheckbox) groupCheckbox.checked = false;
+            }
+
+            // ВЫЗОВ 2: Обновляем расписание после переключения одиночного чекбокса
+            updateSchedulePanel();
+        });
+    });
+}
 
     document.querySelectorAll('.route-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
@@ -13095,6 +13121,45 @@ function setupCheckboxListeners() {
             }
         });
     });
+}
+
+function updateSchedulePanel() {
+    const schedulePanel = document.getElementById('schedule-panel');
+    const routeNameHeader = document.getElementById('schedule-route-name');
+    const scheduleList = document.getElementById('schedule-list');
+    
+    if (!schedulePanel || !routeNameHeader || !scheduleList) return;
+    
+    const activeCheckboxes = document.querySelectorAll('.route-checkbox:checked');
+    
+    if (activeCheckboxes.length === 0) {
+        schedulePanel.style.display = 'none';
+        return;
+    }
+    
+    const lastSelectedCheckbox = activeCheckboxes[activeCheckboxes.length - 1];
+    const routeId = lastSelectedCheckbox.dataset.routeId;
+    const groupName = lastSelectedCheckbox.dataset.group;
+    
+    const route = routeGroups[groupName].routes.find(r => r.id === routeId);
+    
+    routeNameHeader.innerText = route.name;
+    routeNameHeader.style.color = route.color;
+    
+    scheduleList.innerHTML = '';
+    
+    if (route.schedule && route.schedule.length > 0) {
+        route.schedule.forEach(time => {
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'time-tag';
+            timeSpan.innerText = time;
+            scheduleList.appendChild(timeSpan);
+        });
+    } else {
+        scheduleList.innerHTML = '<span style="font-size:12px; color:#8898aa;">Расписание не указано</span>';
+    }
+    
+    schedulePanel.style.display = 'block';
 }
 
 function toggleMenu() {
