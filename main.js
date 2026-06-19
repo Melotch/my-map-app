@@ -8759,8 +8759,8 @@ const routeGroups = {
         ]
 ], 
                 stops: []
-            }
-            { 
+            },
+        { 
                 id: "gub_2",
                 name: "Губкин - ФП",
                 coordinates: [
