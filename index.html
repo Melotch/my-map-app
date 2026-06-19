@@ -192,6 +192,84 @@
         </div>
 
     <button class="menu-toggle" id="menuToggle">☰ Меню</button>
+    <div id="schedule-panel" class="schedule-sidebar" style="display: none;">
+    <div class="sidebar-header">
+        <h3>Расписание движения</h3>
+        <span id="schedule-route-name" class="sub-title">Маршрут не выбран</span>
+    </div>
+    <hr>
+    <div id="schedule-list" class="time-grid">
+        </div>
+</div>
+
+<style>
+/* Стили для правого окошка расписания */
+.schedule-sidebar {
+    position: absolute;
+    top: 20px;
+    right: 20px; /* В отличие от диспетчера, это окно справа */
+    z-index: 9999;
+    background: rgba(24, 28, 36, 0.95);
+    color: #e0e6ed;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    width: 260px;
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+.time-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+.time-tag {
+    background: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+    border: 1px solid rgba(52, 152, 219, 0.4);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    flex: 1 1 calc(33.33% - 8px); /* Ровные плашки в 3 колонки */
+}
+    /* АДАПТИВ ДЛЯ СМАРТФОНОВ (Экраны меньше 768px) */
+@media (max-width: 768px) {
+    /* Панель диспетчера (слева) */
+    .route-sidebar {
+        top: 10px;
+        left: 10px;
+        width: calc(100% - 20px); /* Растягиваем почти на всю ширину экрана */
+        max-height: 35vh; /* Ограничиваем по высоте, чтобы видеть карту */
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    /* Панель расписания (справа) */
+    .schedule-sidebar {
+        top: auto; /* Сбрасываем фиксацию сверху */
+        bottom: 10px; /* Прижимаем к самому низу экрана */
+        left: 10px;
+        right: 10px;
+        width: calc(100% - 20px); /* Тоже во всю ширину */
+        max-height: 30vh;
+        padding: 12px;
+    }
+
+    /* Делаем плашки времени чуть крупнее, чтобы по ним было удобно тапать пальцем */
+    .time-tag {
+        padding: 6px 10px;
+        font-size: 15px;
+    }
+    
+    .sidebar-header h3 {
+        font-size: 16px;
+    }
+}
+</style>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="main.js"></script>
