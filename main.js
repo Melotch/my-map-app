@@ -4136,8 +4136,10 @@ const routeGroups = {
                  stops: [
                     { id: "stop_ru2_1", name: "Остановка A", coords: [] }, 
                     { id: "stop_ru2_2", name: "Остановка B", coords: [] },  
-                  ],
-            }      
+                ]
+            }
+        ]
+    }
     "ЦЖДТ": {
         enabled: false,
         color: "#3498db", // Синий для ЦЖДТ
