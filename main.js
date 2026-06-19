@@ -176,8 +176,8 @@ const routeGroups = {
                     [51.243227622978026, 37.79471892658455]
                 ],
                 stops: [
-                    { id: "stop_fab1_1", name: "Остановка 1", coords: [] },
-                    { id: "stop_fab1_2", name: "Остановка 2", coords: [] }
+                    { id: "stop_fab1_1", name: "ТЦ Европа", coords: [51.2850874, 37.7930025] },
+                    { id: "stop_fab1_2", name: "Бульвар Дружбы", coords: [51.2861628, 37.8020667] }
                 ]
             },
             {
