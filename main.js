@@ -12963,42 +12963,51 @@ function drawRouteOnMap(route, groupColor) {
         lineJoin: 'round'
     }).addTo(routeGroupLayer);
 
-    // 2. Рисуем остановки прямо внутрь этой же группы слоев
-    if (route.stops) {
-        route.stops.forEach(stop => {
-            if (stop.coords && stop.coords.length === 2) {
-                const marker = L.marker(stop.coords, {
-                    icon: L.divIcon({
-                        className: 'stop-marker-container',
-                        html: `
-                            <div class="stop-marker-pulse" style="background-color: ${groupColor}"></div>
-                            <div class="stop-marker-body" style="border-color: ${groupColor}">
-                                <span class="stop-title">${stop.name}</span>
-                            </div>
-                        `,
-                        iconSize: [30, 30],
-                        iconAnchor: [15, 15]
-                    })
-                });
-// Красивое всплывающее расписание для мобилок и ПК при клике на точку
-const scheduleText = (route.schedule && route.schedule.length > 0) 
-    ? route.schedule.join(', ') 
-    : "Не указано";
+ // 2. Рисуем остановки прямо внутрь этой же группы слоев
+if (route.stops) {
+    route.stops.forEach(stop => {
+        if (stop.coords && stop.coords.length === 2) {
+            const marker = L.marker(stop.coords, {
+                icon: L.divIcon({
+                    className: 'stop-marker-container',
+                    html: `
+                        <div class="stop-marker-pulse" style="background-color: ${groupColor}"></div>
+                        <div class="stop-marker-body" style="border-color: ${groupColor}">
+                            <span class="stop-title">${stop.name}</span>
+                        </div>
+                    `,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                })
+            });
 
-// Проверяем: есть ли личное описание у остановки, иначе берем имя маршрута
-const stopInfo = stop.description || `Маршрут: ${route.name}`;
-
-marker.bindPopup(`
-    <div style="font-family: Arial, sans-serif; min-width: 160px; color: #333; padding: 2px;">
-        <h4 style="margin: 0 0 5px 0; color: ${groupColor}; font-size: 14px;">${stop.name}</h4>
-        <p style="margin: 0 0 4px 0; font-size: 12px;"><b>Информация:</b> ${stopInfo}</p>
-        <p style="margin: 0; font-size: 12px;"><b>Расписание:</b> <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-weight: bold;">${scheduleText}</span></p>
-    </div>
-`);
-              marker.addTo(routeGroupLayer);
+            // Проверяем: есть ли у КОНКРЕТНОЙ остановки свое личное расписание (массив или строка)
+            let stopScheduleText = "Не указано";
+            if (stop.stopSchedule) {
+                stopScheduleText = Array.isArray(stop.stopSchedule) 
+                    ? stop.stopSchedule.join(', ') 
+                    : stop.stopSchedule;
+            } else if (route.schedule && route.schedule.length > 0) {
+                // Если своего расписания нет, как запасной вариант берем общее расписание маршрута
+                stopScheduleText = route.schedule.join(', ');
             }
-        });
-    }
+
+            // Проверяем личную информацию/описание остановки
+            const stopInfo = stop.description || `Маршрут: ${route.name}`;
+
+            // Всплывающее окошко при клике на остановку
+            marker.bindPopup(`
+                <div style="font-family: Arial, sans-serif; min-width: 160px; color: #333; padding: 2px;">
+                    <h4 style="margin: 0 0 5px 0; color: ${groupColor}; font-size: 14px;">${stop.name}</h4>
+                    <p style="margin: 0 0 4px 0; font-size: 12px;"><b>Информация:</b> ${stopInfo}</p>
+                    <p style="margin: 0; font-size: 12px;"><b>Прибытие:</b> <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-weight: bold;">${stopScheduleText}</span></p>
+                </div>
+            `);
+
+            marker.addTo(routeGroupLayer);
+        }
+    });
+}
 
     // Добавляем всю группу (линию + остановки) на карту разом
     routeGroupLayer.addTo(map);
