@@ -13050,14 +13050,13 @@ function initRouteManager() {
         });
     }
 function setupCheckboxListeners() {
-    // 1. Настраиваем БОЛЬШИЕ галочки
+    // 1. Настраиваем БОЛЬШИЕ галочки (Категории)
     document.querySelectorAll('.group-checkbox').forEach(groupCheckbox => {
         groupCheckbox.addEventListener('change', function() {
             const groupName = this.getAttribute('data-group');
             const isChecked = this.checked;
             
             const childCheckboxes = document.querySelectorAll(`.route-checkbox[data-group="${groupName}"]`);
-            
             childCheckboxes.forEach(childCheckbox => {
                 childCheckbox.checked = isChecked;
                 const routeId = childCheckbox.getAttribute('data-route-id');
@@ -13066,7 +13065,7 @@ function setupCheckboxListeners() {
         });
     });
 
-    // 2. Настраиваем МАЛЕНЬКИЕ галочки
+    // 2. Настраиваем МАЛЕНЬКИЕ галочки (Каждый маршрут отдельно)
     document.querySelectorAll('.route-checkbox').forEach(routeCheckbox => {
         routeCheckbox.addEventListener('change', function() {
             const routeId = this.getAttribute('data-route-id');
@@ -13077,16 +13076,27 @@ function setupCheckboxListeners() {
     });
 }
 
+// Показ и скрытие линии + остановок
 function triggerRouteDisplay(routeId, shouldShow, checkboxElement) {
     let foundRoute = null;
     let foundGroupColor = '#ff0000';
+    const groupName = checkboxElement.getAttribute('data-group');
     
-    for (const groupData of Object.values(routeGroups)) {
-        const route = groupData.routes.find(r => r.id == routeId);
+    if (routeGroups[groupName]) {
+        const route = routeGroups[groupName].routes.find(r => r.id == routeId);
         if (route) {
             foundRoute = route;
-            foundGroupColor = groupData.color;
-            break;
+            foundGroupColor = routeGroups[groupName].color;
+        }
+    } else {
+        // Если группа не считалась сразу, поищем по всем
+        for (const groupData of Object.values(routeGroups)) {
+            const route = groupData.routes.find(r => r.id == routeId);
+            if (route) {
+                foundRoute = route;
+                foundGroupColor = groupData.color;
+                break;
+            }
         }
     }
     
@@ -13095,16 +13105,21 @@ function triggerRouteDisplay(routeId, shouldShow, checkboxElement) {
     if (shouldShow) {
         drawRouteOnMap(foundRoute, foundGroupColor);
     } else {
+        // Полностью удаляем и линию, и остановки с карты
         removeRouteFromMap(routeId);
         
-        const groupName = checkboxElement.getAttribute('data-group');
-        const groupCheckbox = document.querySelector(`.group-checkbox[data-group="${groupName}"]`);
-        if (groupCheckbox) groupCheckbox.checked = false;
+        // Отключаем большую галочку, если сняли маленькую
+        if (groupName) {
+            const groupCheckbox = document.querySelector(`.group-checkbox[data-group="${groupName}"]`);
+            if (groupCheckbox) groupCheckbox.checked = false;
+        }
     }
     
+    // Показываем расписание
     updateSchedulePanel();
 }
 
+// Отрисовка точек-остановок на карте
 function drawStopsOnMap(route, groupColor) {
     if (!route.stops) return;
     route.stops.forEach(stop => {
@@ -13124,15 +13139,17 @@ function drawStopsOnMap(route, groupColor) {
                     })
                 }).addTo(map);
 
+                // Готовим красивую строчку с расписанием
                 const scheduleText = (route.schedule && route.schedule.length > 0) 
                     ? route.schedule.join(', ') 
                     : "Не указано";
 
+                // Всплывающее окошко при клике на остановку (для мобилок и ПК)
                 marker.bindPopup(`
                     <div style="font-family: Arial, sans-serif; min-width: 160px; color: #333; padding: 2px;">
-                        <h4 style="margin: 0 0 5px 0; color: ${groupColor}; font-size: 14px;">${stop.name}</h4>
+                    <h4 style="margin: 0 0 5px 0; color: ${groupColor}; font-size: 14px;">${stop.name}</h4>
                         <p style="margin: 0 0 4px 0; font-size: 12px;"><b>Маршрут:</b> ${route.name}</p>
-                        <p style="margin: 0; font-size: 12px; color: #1e293b;"><b>Расписание:</b> <span style="background: #f1f5f9; padding: 2px 4px; border-radius: 4px; font-weight: bold;">${scheduleText}</span></p>
+                        <p style="margin: 0; font-size: 12px;"><b>Расписание:</b> <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-weight: bold;">${scheduleText}</span></p>
                     </div>
                 `);
 
@@ -13142,10 +13159,12 @@ function drawStopsOnMap(route, groupColor) {
     });
 }
 
+// Показ боковой панели с расписанием
 function updateSchedulePanel() {
     const schedulePanel = document.getElementById('schedule-panel');
     const routeNameHeader = document.getElementById('schedule-route-name');
     const scheduleList = document.getElementById('schedule-list');
+    
     if (!schedulePanel || !routeNameHeader || !scheduleList) return;
     
     const activeCheckboxes = document.querySelectorAll('.route-checkbox:checked');
@@ -13159,7 +13178,9 @@ function updateSchedulePanel() {
     const routeId = lastSelectedCheckbox.dataset.routeId;
     const groupName = lastSelectedCheckbox.dataset.group;
     
+    if (!routeGroups[groupName]) return;
     const route = routeGroups[groupName].routes.find(r => r.id === routeId);
+    if (!route) return;
     
     routeNameHeader.innerText = route.name;
     routeNameHeader.style.color = route.color || routeGroups[groupName].color;
