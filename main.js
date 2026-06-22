@@ -12941,43 +12941,32 @@ function initMap() {
     console.log("Карта успешно инициализирована");
     initRouteManager();
 }
-
 // 3. ОТРИСОВКА И УДАЛЕНИЕ С УЧЕТОМ ЦВЕТА КАТЕГОРИИ
 function drawRouteOnMap(route, groupColor) {
     if (!route.coordinates || route.coordinates.length === 0) return; 
-    if (activeMapLayers[route.id]) return; 
-
+    
+    // Если этот маршрут уже нарисован — сначала полностью стираем его, чтобы не было дублей
+    if (activeMapLayers[route.id]) {
+        removeRouteFromMap(route.id);
+    } 
+    
     console.log(`Отрисовка линии маршрута: ${route.name}`);
+    
+    // Создаем группу слоев, куда упакуем и линию, и все её остановки
+    const routeGroupLayer = L.layerGroup();
 
-    // Используем цвет группы groupColor
+    // 1. Рисуем линию маршрута
     const polyline = L.polyline(route.coordinates, {
         color: groupColor, 
-        weight: 6,       // Сделал чуть жирнее для красоты
+        weight: 6,       
         opacity: 0.85,
         lineJoin: 'round'
-    }).addTo(map);
+    }).addTo(routeGroupLayer);
 
-    activeMapLayers[route.id] = polyline;
-
-    // Передаем цвет группы в отрисовку остановок
-    drawStopsOnMap(route, groupColor);
-}
-
-function removeRouteFromMap(routeId) {
-    if (activeMapLayers[routeId]) {
-        map.removeLayer(activeMapLayers[routeId]);
-        delete activeMapLayers[routeId];
-        removeStopsFromMap(routeId);
-    }
-}
-
-function drawStopsOnMap(route, groupColor) {
-    if (!route.stops) return;
-
-    route.stops.forEach(stop => {
-        if (stop.coords && stop.coords.length === 2) {
-            if (!activeMapLayers[stop.id]) {
-                // Создаем маркер, который красится в цвет линии через border или background
+    // 2. Рисуем остановки прямо внутрь этой же группы слоев
+    if (route.stops) {
+        route.stops.forEach(stop => {
+            if (stop.coords && stop.coords.length === 2) {
                 const marker = L.marker(stop.coords, {
                     icon: L.divIcon({
                         className: 'stop-marker-container',
@@ -12988,41 +12977,53 @@ function drawStopsOnMap(route, groupColor) {
                             </div>
                         `,
                         iconSize: [30, 30],
-                        iconAnchor: [15, 15] // Центрируем маркер ровно по координате
+                        iconAnchor: [15, 15]
                     })
-                }).addTo(map);
-
-                activeMapLayers[stop.id] = marker;
-            }
-        }
-    });
-}
-
-function removeStopsFromMap(routeId) {
-    for (const groupName in routeGroups) {
-        routeGroups[groupName].routes.forEach(route => {
-            if (route.id === routeId && route.stops) {
-                route.stops.forEach(stop => {
-                    if (activeMapLayers[stop.id]) {
-                        map.removeLayer(activeMapLayers[stop.id]);
-                        delete activeMapLayers[stop.id];
-                    }
                 });
+
+                // Красивое всплывающее расписание для мобилок и ПК при клике на точку
+                const scheduleText = (route.schedule && route.schedule.length > 0) 
+                    ? route.schedule.join(', ') 
+                    : "Не указано";
+
+                marker.bindPopup(`
+                    <div style="font-family: Arial, sans-serif; min-width: 160px; color: #333; padding: 2px;">
+                        <h4 style="margin: 0 0 5px 0; color: ${groupColor}; font-size: 14px;">${stop.name}</h4>
+                        <p style="margin: 0 0 4px 0; font-size: 12px;"><b>Маршрут:</b> ${route.name}</p>
+                        <p style="margin: 0; font-size: 12px;"><b>Расписание:</b> <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-weight: bold;">${scheduleText}</span></p>
+                    </div>
+                `);
+
+                marker.addTo(routeGroupLayer);
             }
         });
     }
+
+    // Добавляем всю группу (линию + остановки) на карту разом
+    routeGroupLayer.addTo(map);
+    
+    // Запоминаем её в памяти под ID маршрута
+    activeMapLayers[route.id] = routeGroupLayer;
 }
 
-// 4. ГЕНЕРАЦИЯ ИНТЕРФЕЙСА (Цвет пули берется из группы)
+function removeRouteFromMap(routeId) {
+    if (activeMapLayers[routeId]) {
+        // Leaflet сам удалит и линию, и все маркеры внутри этой группы слоев!
+        map.removeLayer(activeMapLayers[routeId]);
+        delete activeMapLayers[routeId];
+    }
+}
+
+// 4. ГЕНЕРАЦИЯ ИНТЕРФЕЙСА
 function initRouteManager() {
     const container = document.getElementById('routeSidebar');
     if (!container) return;
-
+    container.innerHTML = ''; // Очищаем контейнер перед сборкой
+    
     for (const [groupName, groupData] of Object.entries(routeGroups)) {
         const groupId = groupName.replace(/\s+/g, '_');
         const groupDiv = document.createElement('div');
         groupDiv.className = 'route-group';
-
         groupDiv.innerHTML = `
             <label class="route-group-title" style="border-left: 4px solid ${groupData.color}; padding-left: 8px;">
                 <input type="checkbox" class="group-checkbox" data-group="${groupName}" ${groupData.enabled ? 'checked' : ''}>
@@ -13031,9 +13032,8 @@ function initRouteManager() {
             <div class="group-routes-list" id="list-${groupId}"></div>
         `;
         container.appendChild(groupDiv);
-
+        
         const routesListContainer = document.getElementById(`list-${groupId}`);
-
         groupData.routes.forEach(route => {
             const routeLabel = document.createElement('label');
             routeLabel.className = 'route-item';
@@ -13043,14 +13043,17 @@ function initRouteManager() {
                 ${route.name || "Без названия"}
             `;
             routesListContainer.appendChild(routeLabel);
-
+            
             if (groupData.enabled) {
-                drawRouteOnMap(route, groupData.color); // Передаем цвет при автозагрузке
+                drawRouteOnMap(route, groupData.color);
             }
         });
     }
+    setupCheckboxListeners();
+}
+
 function setupCheckboxListeners() {
-    // 1. Настраиваем БОЛЬШИЕ галочки (Категории)
+    // Клик по БОЛЬШИМ галочкам
     document.querySelectorAll('.group-checkbox').forEach(groupCheckbox => {
         groupCheckbox.addEventListener('change', function() {
             const groupName = this.getAttribute('data-group');
@@ -13061,7 +13064,6 @@ function setupCheckboxListeners() {
                 childCheckbox.checked = isChecked;
                 const routeId = childCheckbox.getAttribute('data-route-id');
                 
-                // Рисуем или удаляем маршрут
                 if (isChecked) {
                     const groupColor = routeGroups[groupName]?.color || '#ff0000';
                     const route = routeGroups[groupName]?.routes.find(r => r.id == routeId);
@@ -13074,7 +13076,7 @@ function setupCheckboxListeners() {
         });
     });
 
-    // 2. Настраиваем МАЛЕНЬКИЕ галочки (Каждый маршрут отдельно)
+    // Клик по МАЛЕНЬКИЕ галочкам
     document.querySelectorAll('.route-checkbox').forEach(routeCheckbox => {
         routeCheckbox.addEventListener('change', function() {
             const routeId = this.getAttribute('data-route-id');
@@ -13088,7 +13090,6 @@ function setupCheckboxListeners() {
             } else {
                 removeRouteFromMap(routeId);
                 
-                // Снимаем галочку с большой категории, если убрали её маршрут
                 const groupCheckbox = document.querySelector(`.group-checkbox[data-group="${groupName}"]`);
                 if (groupCheckbox) groupCheckbox.checked = false;
             }
@@ -13096,47 +13097,7 @@ function setupCheckboxListeners() {
         });
     });
 }
-// Отрисовка точек-остановок на карте с расписанием в Popup
-function drawStopsOnMap(route, groupColor) {
-    if (!route.stops) return;
-    route.stops.forEach(stop => {
-        if (stop.coords && stop.coords.length === 2) {
-            if (!activeMapLayers[stop.id]) {
-                const marker = L.marker(stop.coords, {
-                    icon: L.divIcon({
-                        className: 'stop-marker-container',
-                        html: `
-                            <div class="stop-marker-pulse" style="background-color: ${groupColor}"></div>
-                            <div class="stop-marker-body" style="border-color: ${groupColor}">
-                                <span class="stop-title">${stop.name}</span>
-                            </div>
-                        `,
-                        iconSize: [30, 30],
-                        iconAnchor: [15, 15]
-                    })
-                }).addTo(map);
 
-                // Готовим красивую строчку с расписанием для всплывающего окна
-                const scheduleText = (route.schedule && route.schedule.length > 0) 
-                    ? route.schedule.join(', ') 
-                    : "Не указано";
-
-                // Всплывающее окошко при клике на остановку (работает везде)
-                marker.bindPopup(`
-                    <div style="font-family: Arial, sans-serif; min-width: 160px; color: #333; padding: 2px;">
-                        <h4 style="margin: 0 0 5px 0; color: ${groupColor}; font-size: 14px;">${stop.name}</h4>
-                        <p style="margin: 0 0 4px 0; font-size: 12px;"><b>Маршрут:</b> ${route.name}</p>
-                        <p style="margin: 0; font-size: 12px;"><b>Расписание:</b> <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-weight: bold;">${scheduleText}</span></p>
-                    </div>
-                `);
-
-                activeMapLayers[stop.id] = marker;
-            }
-        }
-    });
-}
-
-// Обновление твоей панели расписания
 function updateSchedulePanel() {
     const schedulePanel = document.getElementById('schedule-panel');
     const routeNameHeader = document.getElementById('schedule-route-name');
@@ -13189,5 +13150,4 @@ document.addEventListener('DOMContentLoaded', function() {
     if (menuToggleBtn) {
         menuToggleBtn.addEventListener('click', toggleMenu);
     }
-})
-};
+});
