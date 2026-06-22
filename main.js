@@ -13060,8 +13060,17 @@ function setupCheckboxListeners() {
             childCheckboxes.forEach(childCheckbox => {
                 childCheckbox.checked = isChecked;
                 const routeId = childCheckbox.getAttribute('data-route-id');
-                triggerRouteDisplay(routeId, isChecked, groupCheckbox);
+                
+                // Рисуем или удаляем маршрут
+                if (isChecked) {
+                    const groupColor = routeGroups[groupName]?.color || '#ff0000';
+                    const route = routeGroups[groupName]?.routes.find(r => r.id == routeId);
+                    if (route) drawRouteOnMap(route, groupColor);
+                } else {
+                    removeRouteFromMap(routeId);
+                }
             });
+            updateSchedulePanel();
         });
     });
 
@@ -13069,57 +13078,25 @@ function setupCheckboxListeners() {
     document.querySelectorAll('.route-checkbox').forEach(routeCheckbox => {
         routeCheckbox.addEventListener('change', function() {
             const routeId = this.getAttribute('data-route-id');
+            const groupName = this.getAttribute('data-group');
             const isChecked = this.checked;
             
-            triggerRouteDisplay(routeId, isChecked, this);
+            if (isChecked) {
+                const groupColor = routeGroups[groupName]?.color || '#ff0000';
+                const route = routeGroups[groupName]?.routes.find(r => r.id == routeId);
+                if (route) drawRouteOnMap(route, groupColor);
+            } else {
+                removeRouteFromMap(routeId);
+                
+                // Снимаем галочку с большой категории, если убрали её маршрут
+                const groupCheckbox = document.querySelector(`.group-checkbox[data-group="${groupName}"]`);
+                if (groupCheckbox) groupCheckbox.checked = false;
+            }
+            updateSchedulePanel();
         });
     });
 }
-
-// Показ и скрытие линии + остановок
-function triggerRouteDisplay(routeId, shouldShow, checkboxElement) {
-    let foundRoute = null;
-    let foundGroupColor = '#ff0000';
-    const groupName = checkboxElement.getAttribute('data-group');
-    
-    if (routeGroups[groupName]) {
-        const route = routeGroups[groupName].routes.find(r => r.id == routeId);
-        if (route) {
-            foundRoute = route;
-            foundGroupColor = routeGroups[groupName].color;
-        }
-    } else {
-        // Если группа не считалась сразу, поищем по всем
-        for (const groupData of Object.values(routeGroups)) {
-            const route = groupData.routes.find(r => r.id == routeId);
-            if (route) {
-                foundRoute = route;
-                foundGroupColor = groupData.color;
-                break;
-            }
-        }
-    }
-    
-    if (!foundRoute) return;
-
-    if (shouldShow) {
-        drawRouteOnMap(foundRoute, foundGroupColor);
-    } else {
-        // Полностью удаляем и линию, и остановки с карты
-        removeRouteFromMap(routeId);
-        
-        // Отключаем большую галочку, если сняли маленькую
-        if (groupName) {
-            const groupCheckbox = document.querySelector(`.group-checkbox[data-group="${groupName}"]`);
-            if (groupCheckbox) groupCheckbox.checked = false;
-        }
-    }
-    
-    // Показываем расписание
-    updateSchedulePanel();
-}
-
-// Отрисовка точек-остановок на карте
+// Отрисовка точек-остановок на карте с расписанием в Popup
 function drawStopsOnMap(route, groupColor) {
     if (!route.stops) return;
     route.stops.forEach(stop => {
@@ -13139,15 +13116,15 @@ function drawStopsOnMap(route, groupColor) {
                     })
                 }).addTo(map);
 
-                // Готовим красивую строчку с расписанием
+                // Готовим красивую строчку с расписанием для всплывающего окна
                 const scheduleText = (route.schedule && route.schedule.length > 0) 
                     ? route.schedule.join(', ') 
                     : "Не указано";
 
-                // Всплывающее окошко при клике на остановку (для мобилок и ПК)
+                // Всплывающее окошко при клике на остановку (работает везде)
                 marker.bindPopup(`
                     <div style="font-family: Arial, sans-serif; min-width: 160px; color: #333; padding: 2px;">
-                    <h4 style="margin: 0 0 5px 0; color: ${groupColor}; font-size: 14px;">${stop.name}</h4>
+                        <h4 style="margin: 0 0 5px 0; color: ${groupColor}; font-size: 14px;">${stop.name}</h4>
                         <p style="margin: 0 0 4px 0; font-size: 12px;"><b>Маршрут:</b> ${route.name}</p>
                         <p style="margin: 0; font-size: 12px;"><b>Расписание:</b> <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-weight: bold;">${scheduleText}</span></p>
                     </div>
@@ -13159,7 +13136,7 @@ function drawStopsOnMap(route, groupColor) {
     });
 }
 
-// Показ боковой панели с расписанием
+// Обновление твоей панели расписания
 function updateSchedulePanel() {
     const schedulePanel = document.getElementById('schedule-panel');
     const routeNameHeader = document.getElementById('schedule-route-name');
