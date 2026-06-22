@@ -12980,21 +12980,22 @@ function drawRouteOnMap(route, groupColor) {
                         iconAnchor: [15, 15]
                     })
                 });
+// Красивое всплывающее расписание для мобилок и ПК при клике на точку
+const scheduleText = (route.schedule && route.schedule.length > 0) 
+    ? route.schedule.join(', ') 
+    : "Не указано";
 
-                // Красивое всплывающее расписание для мобилок и ПК при клике на точку
-                const scheduleText = (route.schedule && route.schedule.length > 0) 
-                    ? route.schedule.join(', ') 
-                    : "Не указано";
+// Проверяем: есть ли личное описание у остановки, иначе берем имя маршрута
+const stopInfo = stop.description || `Маршрут: ${route.name}`;
 
-                marker.bindPopup(`
-                    <div style="font-family: Arial, sans-serif; min-width: 160px; color: #333; padding: 2px;">
-                        <h4 style="margin: 0 0 5px 0; color: ${groupColor}; font-size: 14px;">${stop.name}</h4>
-                        <p style="margin: 0 0 4px 0; font-size: 12px;"><b>Маршрут:</b> ${route.name}</p>
-                        <p style="margin: 0; font-size: 12px;"><b>Расписание:</b> <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-weight: bold;">${scheduleText}</span></p>
-                    </div>
-                `);
-
-                marker.addTo(routeGroupLayer);
+marker.bindPopup(`
+    <div style="font-family: Arial, sans-serif; min-width: 160px; color: #333; padding: 2px;">
+        <h4 style="margin: 0 0 5px 0; color: ${groupColor}; font-size: 14px;">${stop.name}</h4>
+        <p style="margin: 0 0 4px 0; font-size: 12px;"><b>Информация:</b> ${stopInfo}</p>
+        <p style="margin: 0; font-size: 12px;"><b>Расписание:</b> <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-weight: bold;">${scheduleText}</span></p>
+    </div>
+`);
+              marker.addTo(routeGroupLayer);
             }
         });
     }
@@ -13141,7 +13142,22 @@ function updateSchedulePanel() {
 
 function toggleMenu() {
     const sidebar = document.getElementById('routeSidebar');
-    if (sidebar) sidebar.classList.toggle('active');
+    if (!sidebar) return;
+    
+    // Переключаем твой стандартный класс для анимации
+    sidebar.classList.toggle('active');
+    
+    // Дополнительный жесткий контроль для мобилок:
+    if (sidebar.classList.contains('active')) {
+        // Если меню открыто — показываем его полностью
+        sidebar.style.transform = 'translateX(0)';
+        sidebar.style.left = '0';
+    } else {
+        // Если закрыто — уносим его влево за пределы экрана на 100% его ширины
+        sidebar.style.transform = 'translateX(-100%)';
+        // На всякий случай для старых телефонов:
+        sidebar.style.left = '-100%'; 
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
