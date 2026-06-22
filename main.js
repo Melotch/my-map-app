@@ -13053,29 +13053,67 @@ function initRouteManager() {
     setupCheckboxListeners();
 }
 
-// 5. ОБРАБОТЧИКИ КЛИКОВ (Передаем цвета групп при кликах)
 function setupCheckboxListeners() {
-    // 1. Клик по группе (Выбрать всё подразделение)
-    document.querySelectorAll('.group-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
+    // 1. Настраиваем БОЛЬШИЕ галочки (категории)
+    document.querySelectorAll('.group-checkbox').forEach(groupCheckbox => {
+        groupCheckbox.addEventListener('change', function() {
             const groupName = this.getAttribute('data-group');
             const isChecked = this.checked;
-            const groupColor = routeGroups[groupName].color;
-
-            routeGroups[groupName].enabled = isChecked;
-
-            routeGroups[groupName].routes.forEach(route => {
-                const routeCheckbox = document.querySelector(`input[data-route-id="${route.id}"]`);
+            
+            // Находим все маленькие галочки внутри этой группы
+            const childCheckboxes = document.querySelectorAll(`.route-checkbox[data-group="${groupName}"]`);
+            
+            childCheckboxes.forEach(childCheckbox => {
+                // Ставим им такой же статус (вкл/выкл), как у большой галочки
+                childCheckbox.checked = isChecked;
                 
-                if (routeCheckbox) {
-                    routeCheckbox.checked = isChecked;
-                    if (isChecked) {
-                        drawRouteOnMap(route, groupColor);
-                    } else {
-                        removeRouteFromMap(route.id);
-                    }
-                }
+                // И запускаем их перерисовку
+                const routeId = childCheckbox.getAttribute('data-route-id');
+                triggerRouteDisplay(routeId, isChecked, groupCheckbox);
             });
+        });
+    });
+
+    // 2. Настраиваем МАЛЕНЬКИЕ галочки (каждого маршрута отдельно)
+    document.querySelectorAll('.route-checkbox').forEach(routeCheckbox => {
+        routeCheckbox.addEventListener('change', function() {
+            const routeId = this.getAttribute('data-route-id');
+            const isChecked = this.checked;
+            
+            // Включаем или выключаем конкретно этот один маршрут
+            triggerRouteDisplay(routeId, isChecked, this);
+        });
+    });
+}
+
+// Вспомогательная функция, чтобы не дублировать код отрисовки и удаления
+function triggerRouteDisplay(routeId, shouldShow, checkboxElement) {
+    // Ищем данные нашего маршрута по его ID
+    let foundRoute = null;
+    let foundGroupColor = '#ff0000'; // цвет по умолчанию, если что-то пойдет не так
+    
+    for (const groupData of Object.values(routeGroups)) {
+        const route = groupData.routes.find(r => r.id == routeId);
+        if (route) {
+            foundRoute = route;
+            foundGroupColor = groupData.color;
+            break;
+        }
+    }
+    
+    if (!foundRoute) return;
+
+    if (shouldShow) {
+        // Если галочка стоит — рисуем маршрут
+        drawRouteOnMap(foundRoute, foundGroupColor);
+    } else {
+        // Если галочку сняли — стираем маршрут с карты
+        if (activeMapLayers[routeId]) {
+            map.removeLayer(activeMapLayers[routeId]);
+            delete activeMapLayers[routeId];
+        }
+    }
+}
 
             // ВЫЗОВ 1: Обновляем расписание после переключения группы
             updateSchedulePanel();
