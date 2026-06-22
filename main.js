@@ -13189,4 +13189,5 @@ document.addEventListener('DOMContentLoaded', function() {
     if (menuToggleBtn) {
         menuToggleBtn.addEventListener('click', toggleMenu);
     }
-});
+})
+};
