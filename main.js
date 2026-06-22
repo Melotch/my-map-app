@@ -13049,9 +13049,8 @@ function initRouteManager() {
             }
         });
     }
-
 function setupCheckboxListeners() {
-    // 1. Настраиваем БОЛЬШИЕ галочки (категории)
+    // 1. Настраиваем БОЛЬШИЕ галочки
     document.querySelectorAll('.group-checkbox').forEach(groupCheckbox => {
         groupCheckbox.addEventListener('change', function() {
             const groupName = this.getAttribute('data-group');
@@ -13067,7 +13066,7 @@ function setupCheckboxListeners() {
         });
     });
 
-    // 2. Настраиваем МАЛЕНЬКИЕ галочки (каждого маршрута отдельно)
+    // 2. Настраиваем МАЛЕНЬКИЕ галочки
     document.querySelectorAll('.route-checkbox').forEach(routeCheckbox => {
         routeCheckbox.addEventListener('change', function() {
             const routeId = this.getAttribute('data-route-id');
@@ -13147,7 +13146,6 @@ function updateSchedulePanel() {
     const schedulePanel = document.getElementById('schedule-panel');
     const routeNameHeader = document.getElementById('schedule-route-name');
     const scheduleList = document.getElementById('schedule-list');
-    
     if (!schedulePanel || !routeNameHeader || !scheduleList) return;
     
     const activeCheckboxes = document.querySelectorAll('.route-checkbox:checked');
