@@ -13117,9 +13117,6 @@ function triggerRouteDisplay(routeId, shouldShow, checkboxElement) {
 
             // ВЫЗОВ 1: Обновляем расписание после переключения группы
             updateSchedulePanel();
-        });
-    });
-
     // 2. Клик по одиночному маршруту
     document.querySelectorAll('.route-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
@@ -13139,7 +13136,6 @@ function triggerRouteDisplay(routeId, shouldShow, checkboxElement) {
             updateSchedulePanel();
         });
     });
-}
 
    document.querySelectorAll('.route-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', function() {
